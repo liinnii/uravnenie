@@ -1,0 +1,383 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Занятие: предсказание продуктов реакций</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Yeseva+One&display=swap"><style>
+:root{--honeydew:#E6F5E2;--celadon:#A4E3A4;--lime:#B4D44D;--fern:#337738;--khaki:#282900;--bg:#fff;--paper:#fff;--mist:#F1F9EF;--ink:#282900;--soft:#4B5530;--line:rgba(40,41,0,.16);--on-fern:#F3FBF0;--bad:#B4472F;--bad-soft:#F8DED7;--ok-soft:#D3F0CD;--pc:#B4472F;--ec:#337738;--fd:'Yeseva One',Georgia,serif;--fb:'Onest',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 84px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1.0625rem/1.6 var(--fb);overflow-x:hidden}
+h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}
+.wrap{max-width:1040px;margin-inline:auto;padding-inline:16px}
+:focus-visible{outline:3px solid var(--fern);outline-offset:3px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:999px;border:2px solid var(--fern);background:var(--fern);color:var(--on-fern);font:600 .95rem/1.2 var(--fb);cursor:pointer;transition:background .2s}
+.btn:hover:not(:disabled){background:var(--khaki);border-color:var(--khaki)}
+.btn.ghost{background:transparent;color:var(--fern)}.btn.ghost:hover:not(:disabled){color:var(--on-fern);background:var(--fern);border-color:var(--fern)}
+.btn:disabled{opacity:.45;cursor:default}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:19;background:var(--bg)}
+.top .wrap{display:flex;align-items:center;gap:12px;padding-block:8px;flex-wrap:wrap}
+.mark{width:40px;height:40px;border-radius:13px;background:var(--fern);color:var(--lime);display:grid;place-items:center;font:1.1rem var(--fd);flex:none}
+.bst{flex:1 1 10rem;min-width:0;font-weight:600;font-size:.95rem;line-height:1.3}.bst small{display:block;color:var(--soft);font-weight:500;font-size:.78rem}
+.clock{font-variant-numeric:tabular-nums;font-weight:700;font-size:1.15rem}.clock.over{color:var(--bad)}
+.hero{padding-block:20px 40px}
+.panel{position:relative;overflow:hidden;isolation:isolate;border-radius:28px;background:var(--mist)}
+.panel::before{content:"";position:absolute;z-index:-1;inset:-30% -25% -30% 30%;background:conic-gradient(from 210deg at 40% 55%,#A4E3A4,#E6F5E2 16%,#B4D44D 36%,#A4E3A4 54%,#337738 72%,#A4E3A4 88%);filter:blur(50px);opacity:.3}
+.hg{display:grid;gap:32px;padding:clamp(22px,5vw,56px)}
+@media(min-width:900px){.hg{grid-template-columns:1.1fr .9fr;align-items:center}}
+h1{font:400 clamp(2.2rem,6vw,4rem)/1.05 var(--fd);margin-bottom:16px;text-wrap:balance}
+.meta{font-weight:600;margin-bottom:14px}
+.facts{display:grid;gap:8px;margin-bottom:22px}.facts li{padding-left:26px;position:relative;font-weight:500}
+.facts li::before{content:"✦";position:absolute;left:0;color:var(--fern)}
+.lab{background:var(--khaki);color:var(--celadon);border-radius:28px;padding:clamp(14px,3vw,24px);display:grid;gap:8px;position:relative;overflow:hidden}
+.lab::after{content:"";position:absolute;inset:auto -20% -40% -20%;height:70%;background:radial-gradient(closest-side,rgba(180,212,77,.22),transparent);pointer-events:none}
+.lab svg{width:100%;height:auto;display:block;max-height:420px}
+.lab .cap{font:400 1.25rem/1.3 var(--fd);color:#E6F5E2;text-align:center}.lab .cap span{color:var(--lime)}
+.agenda{display:grid;gap:8px;max-width:34rem}
+.agenda a{display:grid;grid-template-columns:5rem 1fr;gap:10px;padding:9px 14px;border-radius:14px;background:var(--paper);color:inherit;text-decoration:none;font-weight:500;border:1px solid var(--line)}
+.agenda a:hover{background:var(--celadon)}.agenda b{color:var(--fern);font-variant-numeric:tabular-nums}
+.stage{padding-block:clamp(40px,6vw,72px);border-top:1px solid var(--line);background:#fff}
+.sg{display:grid;grid-template-columns:7rem minmax(0,1fr);gap:0 28px}
+.mins{font:400 1.7rem/1.1 var(--fd);color:var(--fern)}.mins small{display:block;font:600 .75rem var(--fb);color:var(--soft);margin-top:4px}
+.stage.now .mins{color:var(--ink);background:var(--lime);border-radius:14px;padding:8px 12px;align-self:start;width:fit-content}
+.body{display:grid;gap:18px;align-content:start;min-width:0}
+h2{font:400 clamp(1.8rem,4.2vw,2.7rem)/1.1 var(--fd);text-wrap:balance}
+.lead{max-width:40rem;color:var(--soft)}.note{font-size:.95rem;color:var(--soft);max-width:40rem}
+.tt{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fern)}
+.card{background:var(--bg);border-radius:24px;padding:20px;display:grid;gap:12px;border:1px solid var(--line);min-width:0}
+.card h3{font:400 1.4rem/1.2 var(--fd)}
+.card h3 small{display:block;font:600 .82rem var(--fb);color:var(--fern);margin-bottom:4px}
+.key{background:var(--mist);border-radius:16px;padding:12px 16px;font-size:.95rem}
+.ask{background:var(--celadon);border-radius:20px;padding:14px 18px;max-width:40rem}.ask .tt{color:var(--khaki)}
+.warn{background:var(--bad-soft);border-radius:16px;padding:12px 16px;font-size:.95rem}.warn .tt{color:var(--bad)}
+.dt{border:1px solid var(--line);border-radius:14px;padding:10px 16px;background:#fff;font-size:.95rem}.dt summary{cursor:pointer;color:var(--fern);font-weight:600}.dt p{margin-top:8px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;font-size:.97rem}
+.tbl th,.tbl td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{background:var(--mist);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--fern)}
+.tbl tr:last-child td{border-bottom:0}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:500 .95rem var(--fb);padding:7px 12px;border-radius:999px;border:2px solid var(--line);background:#fff;color:inherit;cursor:pointer;min-width:2.6rem}
+.chip:hover{border-color:var(--fern)}.chip[aria-pressed=true]{background:var(--fern);border-color:var(--fern);color:var(--on-fern);font-weight:600}
+.stagegrid{display:grid;gap:20px;align-items:start}
+@media(min-width:900px){.stagegrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.canvas{background:var(--mist);border:1px solid var(--line);border-radius:28px;padding:10px}
+.canvas svg{width:100%;height:auto;display:block}
+.nums{display:grid;gap:8px}
+.num{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:7px 12px;border-radius:14px;background:var(--mist);font-size:.95rem}
+.num b{font:400 1.5rem/1 var(--fd);min-width:2.4rem;text-align:right;color:var(--fern)}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;cursor:pointer;font:inherit;padding:11px 16px;border-radius:16px;border:2px solid var(--line);background:#fff;color:inherit;width:100%}
+.opt:hover:not(:disabled){border-color:var(--fern)}.opt[aria-pressed=true]{border-color:var(--fern);background:var(--ok-soft)}
+.opt.ok,.opt.ok[aria-pressed=true]{border-color:var(--fern);background:var(--ok-soft);font-weight:600}
+.opt.no,.opt.no[aria-pressed=true]{border-color:var(--bad);background:var(--bad-soft);color:var(--bad);font-weight:600}
+.q{background:#fff;border-radius:24px;padding:20px;display:grid;gap:12px;border:1px solid var(--line)}
+.q.bad{border-color:var(--bad)}
+.q h3{font:600 1.1rem/1.35 var(--fb)}.q h3 small{display:block;color:var(--fern);font-weight:600;font-size:.82rem;margin-bottom:4px}
+.q details{font-size:.95rem}.q summary{cursor:pointer;color:var(--fern);font-weight:600}.q details p{margin-top:8px}
+.q.bad details{background:var(--bad-soft);border-radius:14px;padding:12px 16px}.q.bad summary{color:var(--bad)}
+.rows{display:grid;gap:10px}.sc{font-weight:700}
+.res{background:var(--lime);color:var(--khaki);border-radius:24px;padding:18px 22px;font:400 1.4rem/1.3 var(--fd)}
+.hw{background:var(--fern);color:var(--on-fern);border-radius:24px;padding:24px;display:grid;gap:12px;max-width:44rem}
+.hw h3{font:400 1.6rem/1.2 var(--fd)}.hw .tt{color:var(--lime)}.hw p{font-size:1.05rem}
+.hw ol{display:grid;gap:8px}.hw li{padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.12);font-size:1.02rem}
+.hw .btn{background:var(--lime);border-color:var(--lime);color:var(--khaki)}.hw .btn:hover:not(:disabled){background:var(--celadon);border-color:var(--celadon)}
+.btns{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.hw .note{color:var(--celadon)}
+footer{background:var(--khaki);color:var(--celadon);padding:22px 0 30px;font-size:.92rem}
+.js .rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}.js .rv.in{opacity:1;transform:none}
+@media(max-width:720px){.sg{grid-template-columns:minmax(0,1fr);gap:12px}.mins{display:flex;gap:10px;align-items:baseline}.mins small{margin:0}.top .btn{padding:8px 14px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;transition:none}}
+.trn{background:var(--mist);border:2px solid var(--fern)}
+.tqt{font:600 1.05rem/1.5 var(--fb);margin-bottom:10px}.tqt b{color:var(--fern)}
+.tfb{border-radius:16px;padding:12px 16px;font-size:.95rem;background:#fff;border:1px solid var(--line)}
+.tfb.ok{background:var(--ok-soft);border-color:var(--fern)}.tfb.no{background:var(--bad-soft);border-color:var(--bad)}.tfb.no b{color:var(--bad)}
+.trn .chips .chip{font-size:.88rem}.trn .opt{font-size:.97rem}
+.trn .tbl{background:#fff}
+.easy{background:#F6F9DC;border:2px dashed var(--lime);border-radius:20px;padding:14px 18px;max-width:44rem;display:grid;gap:6px;font-size:1.05rem}
+.easy .tt{color:var(--fern)}.easy b{color:var(--fern)}
+.eqb{font:400 clamp(1.3rem,4vw,2rem)/1.9 var(--fd);color:var(--ink);word-break:break-word;margin:6px 0 4px}
+.eqb sub{font-size:.58em;vertical-align:baseline;position:relative;top:.28em;line-height:0}
+.eqb sup{font-size:.58em;vertical-align:baseline;position:relative;top:-.5em;line-height:0}
+.eqb .ox,.ox{font:700 .5em var(--fb);position:relative;top:-1.35em;color:var(--bad);margin:0 .08em 0 .05em;letter-spacing:0}
+.eqb .gap{display:inline-block;min-width:1.4em;border-bottom:3px solid var(--fern);color:var(--fern);text-align:center}
+sub{line-height:0}
+.tbl td.okc{background:var(--ok-soft);color:var(--fern);font-weight:700}
+.tbl td.nok{background:var(--bad-soft);color:var(--bad);font-weight:700}
+.big{font:400 clamp(1.6rem,5vw,2.4rem)/1.2 var(--fd);color:var(--fern)}
+.sc-t{font-size:1rem}
+
+.fm{font:400 1.25rem/1.6 var(--fd);color:var(--fern)}
+.hack{background:#F6F9DC;border:2px dashed var(--lime);border-radius:20px;padding:14px 18px;max-width:44rem;font-size:1.05rem}.hack .tt{color:var(--fern)}.hack b{color:var(--fern)}
+.nb{background:#fff;border:2px solid var(--fern);border-radius:20px;padding:14px 18px;max-width:44rem;font-size:1.05rem;display:grid;gap:4px;}.nb .tt{color:var(--fern)}.nb p{line-height:1.5}
+.tet{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr);border:2px solid var(--fern);border-radius:20px;background:#fff repeating-linear-gradient(transparent 0 31px,rgba(51,119,56,.16) 31px 32px);overflow:hidden;max-width:44rem}
+.tet .l{padding:8px 16px;border-right:2px solid #D9534F}.tet .r{padding:8px 16px;min-width:0}
+.tet .hd{font:400 1.1rem/32px var(--fd);color:var(--fern);display:block}.tet p{line-height:32px;margin:0;font-size:1.02rem}
+.tet input,.tet select{font:inherit;border:0;border-bottom:2px solid var(--fern);background:#F6F9DC;text-align:center;padding:0 6px;border-radius:6px 6px 0 0;color:var(--ink);max-width:100%}.tet input{width:5.2rem}
+.tet .okf{border-bottom-color:var(--fern);background:var(--ok-soft)}.tet .nof{border-bottom-color:var(--bad);background:var(--bad-soft)}
+.tcap{font-weight:600;color:var(--fern)}
+@media(max-width:720px){.tet{grid-template-columns:minmax(0,1fr)}.tet .l{border-right:0;border-bottom:2px solid #D9534F}}
+
+.row{font:400 clamp(1.1rem,3.6vw,1.6rem)/1.5 var(--fd);color:var(--fern);display:flex;flex-wrap:wrap;gap:4px 14px}.row span.h{color:var(--bad)}
+.step{opacity:.0;transform:translateY(8px);transition:.4s}.step.in{opacity:1;transform:none}
+.eqf{font:400 1.2rem/1.6 var(--fd);color:var(--ink);word-break:break-word}
+.hwl li{counter-increment:h}.eqq{font:400 1.25rem/1.4 var(--fd)}
+.flow{display:grid;gap:10px}@media(min-width:760px){.flow{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.fl{background:var(--fern);color:var(--on-fern);border-radius:20px;padding:14px 16px;position:relative;font-size:.95rem}.fl b{display:block;font:400 1.15rem/1.2 var(--fd);color:var(--lime);margin-bottom:4px}
+@media(min-width:760px){.fl:not(:last-child)::after{content:"→";position:absolute;right:-14px;top:50%;transform:translateY(-50%);z-index:2;font-size:1.4rem;color:var(--fern);background:#fff;border-radius:50%;width:24px;height:24px;display:grid;place-items:center;line-height:1}}
+.sch{font:400 1.15rem/1.5 var(--fd);color:var(--fern)}.sch small{display:block;font:500 .85rem var(--fb);color:var(--soft)}
+</style></head><body>
+<div class="top"><div class="wrap">
+  <div class="mark">Хм</div>
+  <div class="bst"><small>Сейчас</small><span id="bs">Занятие не начато</span></div>
+  <div class="clock" id="clock">00:00 / 60:00</div>
+  <button class="btn" id="tg" type="button">Старт</button>
+  <button class="btn ghost" id="rs" type="button">Сначала</button>
+</div></div>
+
+<header class="wrap hero"><div class="panel"><div class="hg">
+  <div>
+    <p class="meta">Химия · ОГЭ · уравнения реакций</p>
+    <h1>Предсказание продуктов реакций</h1>
+    <p class="meta">Тип реакции · продукты · ряд активности · условия обмена · коэффициенты · 60 минут</p>
+    <ul class="facts">
+      <li>Слабая тема: идём медленно, каждый шаг проговариваем вслух</li>
+      <li>Алгоритм из четырёх шагов: тип, продукты, возможность, коэффициенты</li>
+      <li>Разбор примера кнопкой «Дальше» и тренажёр с бесконечными заданиями</li>
+      <li>В конце три вопроса по подтеме «Предсказание продуктов реакций»</li>
+      <li>Домашнее задание на 12 минут: конспект и 5 схем реакций</li>
+    </ul>
+    <ol class="agenda">
+      <li><a href="#s1"><b>0–5′</b><span>Настройка и цель</span></a></li>
+      <li><a href="#s2"><b>5–15′</b><span>Четыре типа реакций</span></a></li>
+      <li><a href="#s3"><b>15–27′</b><span>Алгоритм предсказания</span></a></li>
+      <li><a href="#s4"><b>27–39′</b><span>Ряд активности и обмен</span></a></li>
+      <li><a href="#s5"><b>39–49′</b><span>Тренажёр: тип и продукты</span></a></li>
+      <li><a href="#s6"><b>49–55′</b><span>Три вопроса по подтеме</span></a></li>
+      <li><a href="#s7"><b>55–60′</b><span>Домашнее задание</span></a></li>
+    </ol>
+  </div>
+  <div class="lab">
+    <svg viewBox="0 0 400 220" role="img" aria-label="Схема: реагенты, стрелка, продукты">
+      <rect x="14" y="70" width="110" height="80" rx="20" fill="#337738"/><rect x="276" y="70" width="110" height="80" rx="20" fill="#B4D44D"/>
+      <text x="69" y="122" text-anchor="middle" font-size="34" fill="#E6F5E2" font-family="Yeseva One,Georgia,serif">A + B</text>
+      <text x="331" y="122" text-anchor="middle" font-size="40" fill="#282900" font-family="Yeseva One,Georgia,serif">?</text>
+      <line x1="140" y1="110" x2="250" y2="110" stroke="#B4D44D" stroke-width="6" stroke-linecap="round"/><polygon points="262,110 242,98 242,122" fill="#B4D44D"/>
+      <text x="195" y="88" text-anchor="middle" font-size="18" fill="#A4E3A4" font-family="Onest,sans-serif">тип реакции</text>
+    </svg>
+    <p class="cap">Сначала тип: <span>он подскажет продукты</span></p>
+  </div>
+</div></div></header>
+
+<main>
+<section class="stage" id="s1" data-start="0" data-name="Настройка и цель"><div class="wrap sg">
+  <div class="mins">0–5′<small>минут</small></div>
+  <div class="body">
+    <h2>Настройка и цель</h2>
+    <p class="lead">Тема сложная, поэтому идём медленно: один шаг, один вопрос ученику, потом дальше. К концу занятия ученик по реагентам определяет тип реакции, пишет формулы продуктов, проверяет, идёт ли реакция, и расставляет коэффициенты.</p>
+    <div class="hack"><span class="tt">Лайфхак</span><p>Продукты не придумывают, а <b>собирают по шаблону типа</b>. Сначала тип, потом шаблон, потом заряды и коэффициенты.</p></div>
+    <div class="easy"><span class="tt">Простыми словами</span><p>Реакция это как перестановка кубиков. Атомы остаются теми же, меняются только «соседи». Если знаешь, как кубики переставляются в каждом типе, продукты угадываются сами.</p></div>
+    <div class="ask"><span class="tt">Спросить ученика</span><p>Как ты обычно пишешь продукты: вспоминаешь или угадываешь? Где чаще всего ошибаешься: в формулах, в коэффициентах или в том, идёт ли реакция?</p></div>
+    <details class="dt"><summary>Ответы для репетитора</summary><p>Запишите, где именно ошибки: это определит, на каком этапе замедляться. Если путает формулы продуктов, дольше задержитесь на зарядах ионов в разделе 15–27′.</p></details>
+  </div>
+</div></section>
+
+<section class="stage" id="s2" data-start="5" data-name="Четыре типа реакций"><div class="wrap sg">
+  <div class="mins">5–15′<small>минут</small></div>
+  <div class="body">
+    <h2>Четыре типа реакций</h2>
+    <p class="lead">Тип определяем по реагентам: сколько веществ вступает и простые они или сложные.</p>
+    <div class="card"><div class="scroll"><table class="tbl">
+      <tr><th>Тип</th><th>Схема</th><th>Пример</th></tr>
+      <tr><td><b>Соединение</b></td><td>A + B → AB</td><td>2Mg + O₂ → 2MgO</td></tr>
+      <tr><td><b>Разложение</b></td><td>AB → A + B</td><td>CaCO₃ → CaO + CO₂</td></tr>
+      <tr><td><b>Замещение</b></td><td>A + BC → AC + B</td><td>Zn + 2HCl → ZnCl₂ + H₂</td></tr>
+      <tr><td><b>Обмен</b></td><td>AB + CD → AD + CB</td><td>CuSO₄ + 2NaOH → Cu(OH)₂ + Na₂SO₄</td></tr>
+    </table></div></div>
+    <div class="hack"><span class="tt">Лайфхак</span><p>Считай реагенты. <b>Из многих одно</b> это соединение, <b>из одного многое</b> это разложение. Простое + сложное это замещение. Сложное + сложное это обмен.</p></div>
+    <div class="ask"><span class="tt">Спросить ученика</span><p>Определи тип: 1) Fe + S → FeS; 2) Mg(OH)₂ → MgO + H₂O; 3) Fe + CuCl₂ → FeCl₂ + Cu; 4) HCl + KOH → KCl + H₂O. Как ты это увидел?</p></div>
+    <details class="dt"><summary>Ответы для репетитора</summary><p>1) соединение (два простых в одно); 2) разложение (одно в два); 3) замещение (простое + сложное); 4) обмен (два сложных, меняются ионами). Требуйте объяснение по числу и виду реагентов.</p></details>
+  </div>
+</div></section>
+
+<section class="stage" id="s3" data-start="15" data-name="Алгоритм предсказания"><div class="wrap sg">
+  <div class="mins">15–27′<small>минут</small></div>
+  <div class="body">
+    <h2>Алгоритм предсказания</h2>
+    <p class="lead">Разбираем один пример по шагам. Нажимай «Дальше» только после того, как ученик сам назвал шаг.</p>
+    <div class="card trn">
+      <h3><small>Пример</small>Al + HCl → ?</h3>
+      <div class="nums" id="st"></div>
+      <div class="btns"><button class="btn" id="nx" type="button">Дальше</button><button class="btn ghost" id="rst" type="button">Сначала</button></div>
+    </div>
+    <div class="card"><h3><small>Шаблоны продуктов</small>Что получается чаще всего</h3><div class="scroll"><table class="tbl">
+      <tr><th>Реагенты</th><th>Продукты</th></tr>
+      <tr><td>металл или неметалл + O₂</td><td>оксид</td></tr>
+      <tr><td>кислотный оксид + H₂O</td><td>кислота (SO₃ + H₂O → H₂SO₄)</td></tr>
+      <tr><td>нерастворимое основание, t</td><td>оксид металла + H₂O</td></tr>
+      <tr><td>карбонат, t</td><td>оксид металла + CO₂</td></tr>
+      <tr><td>кислота + основание</td><td>соль + H₂O</td></tr>
+      <tr><td>карбонат + кислота</td><td>соль + H₂O + CO₂</td></tr>
+    </table></div></div>
+    <div class="warn"><span class="tt">Частая ошибка</span><p>Формулу соли пишут не «по памяти», а по зарядам: Al³⁺ и Cl⁻ дают AlCl₃, а не AlCl. Железо в таких реакциях даёт Fe²⁺: Fe + 2HCl → FeCl₂ + H₂.</p></div>
+    <div class="easy"><span class="tt">Простыми словами</span><p>Заряды должны «сложиться в ноль». У Al +3, у Cl −1, значит нужно три хлора на один алюминий.</p></div>
+    <div class="ask"><span class="tt">Спросить ученика</span><p>Напиши формулы солей: натрий и сульфат (SO₄²⁻); кальций и хлорид; алюминий и сульфат.</p></div>
+    <details class="dt"><summary>Ответы для репетитора</summary><p>Na₂SO₄; CaCl₂; Al₂(SO₄)₃. Если ошибка: напишите заряды над символами и «перекрестите» их в индексы (2 и 3 у алюминия и сульфата).</p></details>
+  </div>
+</div></section>
+
+<section class="stage" id="s4" data-start="27" data-name="Ряд активности и обмен"><div class="wrap sg">
+  <div class="mins">27–39′<small>минут</small></div>
+  <div class="body">
+    <h2>Ряд активности и условия обмена</h2>
+    <p class="lead">Не всякая реакция идёт. Для замещения смотрим ряд активности, для обмена ищем осадок, газ или воду.</p>
+    <div class="card"><h3><small>Ряд активности металлов</small>Левее активнее</h3>
+      <div class="row"><span>Li K Ca Na Mg Al Zn Fe Ni Sn Pb</span><span class="h">(H)</span><span>Cu Hg Ag Au</span></div>
+      <p class="note">Металл левее H вытесняет водород из кислот (кроме HNO₃ и концентрированной H₂SO₄). Металл левее вытесняет правый из раствора его соли.</p></div>
+    <div class="stagegrid">
+      <div class="card"><h3><small>Замещение идёт</small>Zn + CuSO₄</h3><p>Zn левее Cu, значит Zn + CuSO₄ → ZnSO₄ + Cu. А Cu + ZnSO₄ не идёт.</p></div>
+      <div class="card"><h3><small>Обмен идёт, если</small>есть признак</h3><p>Выпадает осадок (↓), выделяется газ (↑) или образуется вода (слабый электролит). Иначе реакции нет.</p></div>
+    </div>
+    <div class="hack"><span class="tt">Лайфхак</span><p>В таблице растворимости ищи <b>нерастворимые</b> соли и основания среди продуктов: BaSO₄, AgCl, CaCO₃, Cu(OH)₂. Нашёл, значит обмен идёт.</p></div>
+    <div class="warn"><span class="tt">Частая ошибка</span><p>H₂CO₃ в продуктах не пишут: она распадается на H₂O и CO₂. Поэтому Na₂CO₃ + 2HCl → 2NaCl + H₂O + CO₂↑.</p></div>
+    <div class="ask"><span class="tt">Спросить ученика</span><p>Пойдёт ли: 1) Cu + HCl; 2) Mg + H₂SO₄ (разб.); 3) NaCl + KNO₃; 4) AgNO₃ + HCl? Почему?</p></div>
+    <details class="dt"><summary>Ответы для репетитора</summary><p>1) нет, Cu правее H; 2) да, MgSO₄ + H₂; 3) нет, нет осадка, газа и воды; 4) да, AgCl↓ + HNO₃.</p></details>
+  </div>
+</div></section>
+
+<section class="stage" id="s5" data-start="39" data-name="Тренажёр"><div class="wrap sg">
+  <div class="mins">39–49′<small>минут</small></div>
+  <div class="body">
+    <h2>Тренажёр: тип и продукты</h2>
+    <p class="lead">Выбери тип реакции и верные продукты. После проверки появится уравнение с коэффициентами. Задания идут по кругу в случайном порядке.</p>
+    <div class="card trn" id="tr"></div>
+    <div class="ask"><span class="tt">Спросить ученика</span><p>Прочитай уравнение вслух и покажи, как проверить коэффициенты: сколько атомов каждого элемента слева и справа?</p></div>
+  </div>
+</div></section>
+
+<section class="stage" id="s6" data-start="49" data-name="Три вопроса по подтеме"><div class="wrap sg">
+  <div class="mins">49–55′<small>минут</small></div>
+  <div class="body">
+    <h2>Три вопроса по подтеме</h2>
+    <p class="lead">Подтема: «Предсказание продуктов реакций». Ученик отвечает сам, ошибка подсвечивается красным, разбор спрятан под вопросом.</p>
+    <div class="rows" id="qs"></div>
+    <p class="sc" id="sc">Отвечено: 0 из 3</p>
+    <div class="res" id="rs3" hidden></div>
+  </div>
+</div></section>
+
+<section class="stage" id="s7" data-start="55" data-name="Домашнее задание"><div class="wrap sg">
+  <div class="mins">55–60′<small>минут</small></div>
+  <div class="body">
+    <h2>Домашнее задание</h2>
+    <div class="hw">
+      <span class="tt">Домашнее задание · около 12 минут</span>
+      <h3>Конспект и 5 схем реакций</h3>
+      <div>
+        <p id="hws">Прочитать конспект по подтеме «Предсказание продуктов реакций» и решить 5 схем реакций: расставить коэффициенты и определить тип реакции; к каждой ошибке записать правило (около 12 мин).</p>
+        <ol id="hwl" style="margin-top:12px">
+          <li><b>1.</b> Al + O₂ → Al₂O₃</li>
+          <li><b>2.</b> Fe(OH)₃ → Fe₂O₃ + H₂O</li>
+          <li><b>3.</b> Al + HCl → AlCl₃ + H₂</li>
+          <li><b>4.</b> Na₂CO₃ + CaCl₂ → CaCO₃ + NaCl</li>
+          <li><b>5.</b> Fe₂O₃ + H₂SO₄ → Fe₂(SO₄)₃ + H₂O</li>
+        </ol>
+      </div>
+      <div class="btns"><button class="btn" id="cp" type="button">Скопировать задание</button><span class="note" id="cm"></span></div>
+    </div>
+    <details class="dt"><summary>Конспект для чтения дома</summary>
+      <p><b>Алгоритм:</b> 1) тип по реагентам; 2) продукты по шаблону типа, формулы по зарядам; 3) возможность: ряд активности, осадок, газ или вода; 4) коэффициенты по числу атомов.</p>
+      <p><b>Типы:</b> соединение A + B → AB; разложение AB → A + B; замещение A + BC → AC + B; обмен AB + CD → AD + CB.</p>
+      <p><b>Правила:</b> металл левее H вытесняет водород из кислот; металл вытесняет правый металл из соли; обмен идёт при ↓, ↑ или H₂O; H₂CO₃ распадается на H₂O и CO₂; Fe в замещении даёт Fe²⁺.</p>
+    </details>
+    <details class="dt"><summary>Ответы к домашнему заданию для репетитора</summary>
+      <p><b>1.</b> 4Al + 3O₂ → 2Al₂O₃, соединение.</p>
+      <p><b>2.</b> 2Fe(OH)₃ → Fe₂O₃ + 3H₂O, разложение.</p>
+      <p><b>3.</b> 2Al + 6HCl → 2AlCl₃ + 3H₂, замещение.</p>
+      <p><b>4.</b> Na₂CO₃ + CaCl₂ → CaCO₃↓ + 2NaCl, обмен.</p>
+      <p><b>5.</b> Fe₂O₃ + 3H₂SO₄ → Fe₂(SO₄)₃ + 3H₂O, обмен.</p>
+    </details>
+    <div class="key"><span class="tt">В конце занятия</span><br>Ученик называет четыре шага алгоритма, четыре типа реакций и условия, при которых идут замещение и обмен.</div>
+  </div>
+</div></section>
+<section class="stage" id="s8"><div class="wrap sg">
+  <div class="mins">✎<small>тетрадь</small></div>
+  <div class="body">
+    <h2>Схема для тетради</h2>
+    <p class="lead">Эту страницу ученик переписывает или фотографирует после занятия. Один взгляд: алгоритм, типы, условия и частые ошибки.</p>
+    <div class="flow">
+      <div class="fl"><b>1. Тип</b>Считаем реагенты: простое или сложное, сколько веществ</div>
+      <div class="fl"><b>2. Продукты</b>Шаблон типа, формулы по зарядам</div>
+      <div class="fl"><b>3. Идёт ли?</b>Ряд активности, осадок, газ или вода</div>
+      <div class="fl"><b>4. Коэффициенты</b>Атомов слева и справа поровну</div>
+    </div>
+    <div class="stagegrid">
+      <div class="card"><h3><small>Соединение</small>из многих одно</h3><p class="sch">A + B → AB<small>2Mg + O₂ → 2MgO</small></p></div>
+      <div class="card"><h3><small>Разложение</small>из одного многое</h3><p class="sch">AB → A + B<small>CaCO₃ → CaO + CO₂</small></p></div>
+      <div class="card"><h3><small>Замещение</small>простое + сложное</h3><p class="sch">A + BC → AC + B<small>Zn + 2HCl → ZnCl₂ + H₂</small></p></div>
+      <div class="card"><h3><small>Обмен</small>сложное + сложное</h3><p class="sch">AB + CD → AD + CB<small>CuSO₄ + 2NaOH → Cu(OH)₂↓ + Na₂SO₄</small></p></div>
+    </div>
+    <div class="stagegrid">
+      <div class="card"><h3><small>Замещение идёт, если</small>металл левее</h3><p>Левее H: вытесняет водород из кислоты.<br>Левее другого металла: вытесняет его из соли.</p><p class="sch">Li K Ca Na Mg Al Zn Fe Ni Sn Pb (H) Cu Hg Ag Au</p></div>
+      <div class="card"><h3><small>Обмен идёт, если</small>есть признак</h3><p class="sch">↓ осадок · ↑ газ · H₂O вода</p></div>
+    </div>
+    <div class="warn"><span class="tt">Не забыть</span><p>Формулы солей по зарядам: Al³⁺ + Cl⁻ → AlCl₃. H₂CO₃ не пишем: H₂O + CO₂. Железо в замещении: Fe²⁺ (FeCl₂).</p></div>
+    <div class="key"><span class="tt">Типовые шаблоны</span><br>металл + O₂ → оксид · кислотный оксид + H₂O → кислота · нерастворимое основание (t) → оксид + H₂O · карбонат (t) → оксид + CO₂ · кислота + основание → соль + H₂O · карбонат + кислота → соль + H₂O + CO₂</div>
+  </div>
+</div></section>
+</main>
+<footer><div class="wrap">Химия с Марией Семилетовой. Занятие по теме «Предсказание продуктов реакций».</div></footer>
+<script>(function(){
+document.documentElement.classList.add('js');
+var $=function(i){return document.getElementById(i)},RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function sh(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+/* пошаговый разбор */
+var S=[['1','Реагенты: простое вещество (металл) и сложное (кислота). Это <b>замещение</b>.'],['2','Al стоит левее H в ряду активности, значит вытесняет водород. Реакция <b>идёт</b>.'],['3','Заряды: Al³⁺ и Cl⁻, соль <b>AlCl₃</b>. Водород простое вещество: <b>H₂</b>.'],['4','Схема: Al + HCl → AlCl₃ + H₂'],['5','Cl: в AlCl₃ их 3, для двух AlCl₃ нужно 6 HCl; тогда водорода 6 атомов, то есть 3H₂. Итог: <b>2Al + 6HCl → 2AlCl₃ + 3H₂</b>.']],k=0,st=$('st');
+function ren(){st.innerHTML=S.slice(0,k).map(function(s){return '<div class="num step in"><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'}).join('');$('nx').disabled=k>=S.length}
+$('nx').onclick=function(){k++;ren()};$('rst').onclick=function(){k=0;ren()};ren();
+/* тренажёр */
+var TY=['соединение','разложение','замещение','обмен'];
+var B=[
+['Mg + O₂ → ?',0,'2MgO',['MgO₂','Mg₂O','MgO + O'],'2Mg + O₂ → 2MgO'],
+['Al + O₂ → ?',0,'Al₂O₃',['AlO₃','Al₃O₂','AlO'],'4Al + 3O₂ → 2Al₂O₃'],
+['CO₂ + H₂O → ?',0,'H₂CO₃',['CO + H₂','C + H₂O₂','H₂CO₂'],'CO₂ + H₂O → H₂CO₃'],
+['CaCO₃ →(t) ?',1,'CaO + CO₂',['Ca + CO₃','CaO + CO','Ca + C + O₂'],'CaCO₃ → CaO + CO₂'],
+['Cu(OH)₂ →(t) ?',1,'CuO + H₂O',['Cu + H₂O₂','Cu + O₂ + H₂','CuO + H₂'],'Cu(OH)₂ → CuO + H₂O'],
+['Zn + HCl → ?',2,'ZnCl₂ + H₂',['ZnCl + H₂','ZnCl₂ + H₂O','ZnH₂ + Cl₂'],'Zn + 2HCl → ZnCl₂ + H₂'],
+['Fe + CuCl₂ → ?',2,'FeCl₂ + Cu',['FeCl₃ + Cu','Fe + CuCl','FeCu + Cl₂'],'Fe + CuCl₂ → FeCl₂ + Cu'],
+['CuSO₄ + NaOH → ?',3,'Cu(OH)₂ + Na₂SO₄',['CuOH + Na₂SO₄','Cu(OH)₂ + NaSO₄','Cu + Na₂SO₄ + H₂O'],'CuSO₄ + 2NaOH → Cu(OH)₂↓ + Na₂SO₄'],
+['HCl + NaOH → ?',3,'NaCl + H₂O',['NaCl + H₂','NaClO + H₂','Na + Cl₂ + H₂O'],'HCl + NaOH → NaCl + H₂O'],
+['Na₂CO₃ + HCl → ?',3,'NaCl + H₂O + CO₂',['NaCl + H₂CO₃','NaCl + H₂ + CO₂','NaCl + CO'],'Na₂CO₃ + 2HCl → 2NaCl + H₂O + CO₂↑']],tr=$('tr'),cur,ty,pr,last=-1;
+function nw(){var i;do{i=Math.floor(Math.random()*B.length)}while(i===last);last=i;cur=B[i];ty=null;pr=null;
+ var os=sh([cur[2]].concat(cur[3]));
+ tr.innerHTML='<h3><small>Тренажёр</small>Схема</h3><p class="eqq">'+cur[0]+'</p><span class="tt">Тип реакции</span><div class="chips" id="tc">'+TY.map(function(t,j){return '<button class="chip" type="button" aria-pressed="false" data-j="'+j+'">'+t+'</button>'}).join('')+'</div><span class="tt">Продукты</span><div class="opts" id="po">'+os.map(function(o){return '<button class="opt" type="button" aria-pressed="false">'+o+'</button>'}).join('')+'</div><div class="tfb" id="fb" hidden></div><div class="btns"><button class="btn" id="ck" type="button">Проверить</button><button class="btn ghost" id="nn" type="button">Новая схема</button></div>';
+ $('tc').onclick=function(e){var b=e.target.closest('button');if(!b)return;ty=+b.dataset.j;[].forEach.call(this.children,function(x){x.setAttribute('aria-pressed',x===b?'true':'false')})};
+ $('po').onclick=function(e){var b=e.target.closest('button');if(!b)return;pr=b.textContent;[].forEach.call(this.children,function(x){x.setAttribute('aria-pressed',x===b?'true':'false')})};
+ $('nn').onclick=nw;
+ $('ck').onclick=function(){var fb=$('fb');if(ty===null||pr===null){fb.hidden=false;fb.className='tfb';fb.textContent='Выбери тип и продукты.';return}
+  var a=ty===cur[1],b=pr===cur[2];fb.hidden=false;fb.className='tfb '+(a&&b?'ok':'no');
+  [].forEach.call($('po').children,function(o){o.classList.toggle('ok',o.textContent===cur[2]);o.classList.toggle('no',o.textContent===pr&&!b)});
+  fb.innerHTML=(a&&b?'<b>Верно.</b> ':'<b>Есть ошибка.</b> '+(a?'':'Тип: '+TY[cur[1]]+'. ')+(b?'':'Проверь заряды и шаблон типа. '))+'<p class="eqf">'+cur[4]+'</p>'}}
+nw();
+/* вопросы */
+var Q=[
+['Тип реакции','Какой тип реакции: Zn + CuSO₄ → ZnSO₄ + Cu?',['соединение','разложение','замещение','обмен'],2,'Простое вещество Zn вытесняет Cu из сложного CuSO₄. Это замещение.'],
+['Возможность реакции','Какая из реакций не пойдёт?',['Zn + HCl','Fe + CuSO₄','Cu + HCl','Mg + H₂SO₄ (разб.)'],2,'Cu стоит правее H в ряду активности и не вытесняет водород из кислот.'],
+['Условие обмена','Почему идёт реакция BaCl₂ + Na₂SO₄ → BaSO₄ + 2NaCl?',['выпадает осадок BaSO₄','выделяется водород','образуется оксид','это реакция соединения'],0,'Обмен идёт, если есть осадок, газ или вода. BaSO₄ нерастворим и выпадает в осадок.']],ans=[],qs=$('qs');
+function nOk(){var c=0;Q.forEach(function(q,i){if(ans[i]===q[3])c++});return c}
+function nA(){return ans.filter(function(v){return v!==undefined}).length}
+function paint(i){var d=qs.children[i],w=ans[i]!==undefined&&ans[i]!==Q[i][3];d.querySelectorAll('.opt').forEach(function(o,j){o.setAttribute('aria-pressed',ans[i]===j?'true':'false');o.classList.toggle('ok',ans[i]!==undefined&&j===Q[i][3]);o.classList.toggle('no',ans[i]===j&&j!==Q[i][3])});d.classList.toggle('bad',w);var dt=d.querySelector('details');if(dt)dt.open=w}
+Q.forEach(function(q,i){var d=document.createElement('div');d.className='q';d.innerHTML='<h3><small>Вопрос '+(i+1)+' · '+q[0]+'</small>'+q[1]+'</h3><div class="opts">'+q[2].map(function(o){return '<button class="opt" type="button" aria-pressed="false">'+o+'</button>'}).join('')+'</div><details><summary>Почему так</summary><p>'+q[4]+'</p></details>';qs.appendChild(d);d.querySelectorAll('.opt').forEach(function(o,j){o.onclick=function(){ans[i]=j;paint(i);score()}})});
+function score(){var n=nA(),ok=nOk();$('sc').textContent='Верно: '+ok+' из 3 · отвечено '+n;var r=$('rs3');if(n===3){r.hidden=false;r.textContent=ok===3?'Подтема усвоена: 3 из 3.':ok===2?'Почти: 2 из 3. Разобрать вопрос с ошибкой и записать правило.':'Результат '+ok+' из 3. Вернуться к алгоритму, ряду активности и условиям обмена.'}else r.hidden=true}
+score();
+/* копирование */
+$('cp').onclick=function(){var t=$('hws').textContent.trim()+'\n\n'+[].map.call($('hwl').children,function(li){return li.textContent.trim()}).join('\n'),m=$('cm');function ok(){m.textContent='Скопировано'}
+ function fb(){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){m.textContent='Выделите текст вручную'}document.body.removeChild(a)}
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,fb);else fb()};
+/* появление */
+var rv=[].slice.call(document.querySelectorAll('.body>*'));rv.forEach(function(x){x.classList.add('rv')});
+if('IntersectionObserver' in window&&!RM){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{rootMargin:'0px 0px -6% 0px',threshold:.05});rv.forEach(function(x){io.observe(x)})}else rv.forEach(function(x){x.classList.add('in')});
+/* таймер */
+var T=3600,sec=0,run=false,iv=null,sg=[].slice.call(document.querySelectorAll('.stage[data-start]'));
+function pad(n){return(n<10?'0':'')+n}
+function tick(){var m=Math.floor(sec/60),c=$('clock');c.textContent=pad(m)+':'+pad(sec%60)+' / 60:00';c.classList.toggle('over',sec>T);var cu=null;sg.forEach(function(s){if(m>=+s.dataset.start)cu=s});sg.forEach(function(s){s.classList.toggle('now',run&&s===cu)});$('bs').textContent=(run||sec>0)&&cu?cu.dataset.name:'Занятие не начато'}
+$('tg').onclick=function(){run=!run;$('tg').textContent=run?'Пауза':(sec?'Продолжить':'Старт');if(run)iv=setInterval(function(){sec++;tick()},1000);else clearInterval(iv);tick()};
+$('rs').onclick=function(){run=false;clearInterval(iv);sec=0;$('tg').textContent='Старт';tick()};
+tick();
+})();
+</script></body></html>
